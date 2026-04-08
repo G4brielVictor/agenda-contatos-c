@@ -37,6 +37,7 @@ int carregar_arquivo(Contato *contatos, int *contID, int *id){
     fread(id, sizeof(int), 1, file);
 
     fread(contatos, sizeof(Contato), *contID, file);
+    fclose(file);
 
     return 1;
 }

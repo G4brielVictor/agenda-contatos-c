@@ -87,7 +87,7 @@ int validar_nome(char *nome){
     return 1;
 }
 
-int validar_telefone(const char *tel, Contato *contato, int *id){
+int validar_telefone(const char *tel, Contato *contato, int *contID){
     int tam;
 
     if(tel == NULL || strlen(tel) == 0){
@@ -113,7 +113,7 @@ int validar_telefone(const char *tel, Contato *contato, int *id){
         }
     }
 
-    for(int i = 0; i < *id; i++){
+    for(int i = 0; i < *contID; i++){
         if(strcmp(tel, contato[i].telefone ) == 0){
             printf("Telefone já cadastrado\n");
             return 0;
@@ -398,7 +398,7 @@ void editar_telefone(Contato *p, int *id){
         fgets(novoTel, MAX_TELEFONE, stdin);
         limpar_linha(novoTel);
 
-        valido = validar_telefone(novoTel, p, id);
+        valido = validar_telefone(novoTel, novoTel, id);
         if(!valido){
             printf("Telefone invalido, tente novamente.\n");
         }
