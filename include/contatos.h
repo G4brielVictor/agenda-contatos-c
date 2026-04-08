@@ -15,7 +15,7 @@ typedef struct {
 
 int adicionar_contatos(Contato *contato, int *contD, int *id);
 int validar_nome(char *nome);
-int validar_telefone(const char *tel, Contato *contato, int *id);
+int validar_telefone(const char *tel, Contato *contatos, int *id);
 int validar_email(const char *email);
 
 void listar_contatos(Contato *contatos, int *contID);
@@ -24,6 +24,7 @@ void mostrar_contatos(Contato *p);
 int buscar_contato(Contato *contatos, int *contID);
 int buscar_contato_por_nome(const char *buscaNome, Contato *contatos, int *contID);
 int buscar_contato_por_numero(const char *buscaNum, Contato *contatos, int *contID);  
+int buscar_contato_por_id(const int *buscaID, Contato *contatos, int *contID);
 
 int editar_contatos(Contato *contatos, int *contID);
 void editar_nome(Contato *p);

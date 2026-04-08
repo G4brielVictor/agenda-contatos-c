@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <windows.h>
+#include <stdlib.h>
 
 int adicionar_contatos(Contato *contato, int *contID, int *id){
     Contato *p = &contato[*contID];
@@ -87,7 +88,7 @@ int validar_nome(char *nome){
     return 1;
 }
 
-int validar_telefone(const char *tel, Contato *contato, int *contID){
+int validar_telefone(const char *tel, Contato *contatos, int *contID){
     int tam;
 
     if(tel == NULL || strlen(tel) == 0){
@@ -114,7 +115,7 @@ int validar_telefone(const char *tel, Contato *contato, int *contID){
     }
 
     for(int i = 0; i < *contID; i++){
-        if(strcmp(tel, contato[i].telefone ) == 0){
+        if(strcmp(tel, contatos[i].telefone ) == 0){
             printf("Telefone já cadastrado\n");
             return 0;
         }
@@ -177,13 +178,26 @@ void listar_contatos(Contato *contatos, int *contID){
         return;
     }
 
+    //Ordenação em ordem alfábetica A-Z
+    Contato temp;
+    for(int i = 0; i < *contID - 1; i++){
+        for(int j = 0; j < *contID - i - 1; j++){
+            if(strcmp(contatos[j].nome, contatos[j+1].nome) > 0){
+                temp = contatos[j];
+                contatos[j] = contatos[j+1];
+                contatos[j+1] = temp;
+            }
+        }
+    }
+
     printf("====================================================================\n");
     printf("|                LISTA DE CONTATOS                                 |\n");
     printf("====================================================================\n");
     printf("| %-2s | %-20s | %-13s | %-20s |\n", "ID", "NOME", "TELEFONE", "EMAIL");
     printf("---------------------------------------------------------------------\n");
 
-    for(int i = 0; i < *contID; i++){
+
+    for(int i = 0; i < *contID; i++){    
         printf("| %-2d | %-20s | %-13s | %-20s |\n", 
         contatos[i].id, contatos[i].nome, contatos[i].telefone, contatos[i].email);
     }
@@ -208,7 +222,7 @@ int buscar_contato(Contato *contatos, int *contID){
     int pos, opcao;
 
     do {
-        printf("\n| 1 - Buscar numero | 2 - Buscar nome | 0 - Sair  |\nDigite: ");
+        printf("\n| 1 - Buscar numero | 2 - Buscar nome | 3 - Buscar ID | 0 - Sair  |\nDigite: ");
         scanf("%d", &opcao);
         while(getchar() != '\n');
 
@@ -219,7 +233,6 @@ int buscar_contato(Contato *contatos, int *contID){
                 fgets(buscaTelefone, MAX_TELEFONE, stdin);
                 buscaTelefone[strcspn(buscaTelefone, "\n")] = '\0';
 
-                if(buscaTelefone[0] == '\0') return -1;
 
                 pos = buscar_contato_por_numero(buscaTelefone, contatos, contID);
 
@@ -235,7 +248,7 @@ int buscar_contato(Contato *contatos, int *contID){
                 else {
                     printf("\tContato nao encontrado, digite novamente.\n\n");
                 }
-            }while(pos == -1);
+            } while(pos == -1);
         }
 
         else if(opcao == 2){
@@ -244,8 +257,6 @@ int buscar_contato(Contato *contatos, int *contID){
                 printf("\nDigite o nome do contato: ");
                 fgets(buscaNome, MAX_NOME, stdin);
                 buscaNome[strcspn(buscaNome, "\n")] = '\0';
-
-                if(buscaNome[0] == '\0') return -1;
 
                 pos = buscar_contato_por_nome(buscaNome, contatos, contID);
 
@@ -261,7 +272,30 @@ int buscar_contato(Contato *contatos, int *contID){
                 else {
                     printf("\tContato nao encontrado, digite novamente\n\n");
                 }
-            }while(pos == -1);
+            } while(pos == -1);
+        }
+
+        else if(opcao == 3){
+            int buscaID;    
+            do {
+                printf("\nDigite o ID do contato: ");
+                scanf("%d", &buscaID);
+                while(getchar() != '\n');
+
+                pos = buscar_contato_por_id(&buscaID, contatos, contID);
+                if(pos != -1){
+                    printf("\nCONTATO ENCONTRADO!\n");
+                    printf("| %-20s | %-13s | %-20s |\n", "NOME", "TELEFONE", "EMAIL");
+                    printf("---------------------------------------------------------------\n");
+                    printf("| %-20s | %-13s | %-20s |\n", 
+                    contatos[pos].nome, contatos[pos].telefone, contatos[pos].email);
+                    printf("\n");
+                    return pos;
+                }
+                else {
+                    printf("\tContato nao encontrado, digite novamente\n\n");
+                }
+            } while(pos == -1);
         }
 
         else if(opcao == 0){
@@ -285,7 +319,7 @@ int buscar_contato_por_nome(const char *buscaNome, Contato *contatos, int *contI
     }
 
     for(int i = 0; i < *contID; i++){
-        if(_stricmp(buscaNome, contatos[i].nome) == 0){
+        if(strstr(contatos[i].nome, buscaNome) != NULL){
             return i;
         }
     }
@@ -300,6 +334,20 @@ int buscar_contato_por_numero(const char *buscaNum, Contato *contatos, int *cont
 
     for(int i = 0; i < *contID; i++){
         if(strcmp(buscaNum, contatos[i].telefone) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int buscar_contato_por_id(const int *buscaID, Contato *contatos, int *contID){
+    if(buscaID == NULL){
+        printf("\nEntrada vazia, tente novamente. \n");
+        return -1;
+    }
+
+    for(int i = 0; i < *contID; i++){
+        if(*buscaID == contatos[i].id){
             return i;
         }
     }
@@ -398,7 +446,7 @@ void editar_telefone(Contato *p, int *id){
         fgets(novoTel, MAX_TELEFONE, stdin);
         limpar_linha(novoTel);
 
-        valido = validar_telefone(novoTel, novoTel, id);
+        valido = validar_telefone(novoTel, p, id);
         if(!valido){
             printf("Telefone invalido, tente novamente.\n");
         }
